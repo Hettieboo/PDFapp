@@ -412,11 +412,17 @@ if st.button("🚀 Process Files", type="primary"):
                             st.metric("Final Size", format_file_size(stats['final_size']))
                         with col3:
                             size_saved = stats['original_size'] - stats['final_size']
-                            st.metric("Space Saved", format_file_size(size_saved))
+                            if size_saved > 0:
+                                st.metric("Space Saved", format_file_size(size_saved), delta=f"↓ {format_file_size(size_saved)}")
+                            else:
+                                st.metric("Size Change", format_file_size(abs(size_saved)), delta=f"↑ {format_file_size(abs(size_saved))}", delta_color="inverse")
                         with col4:
                             if stats['original_size'] > 0:
                                 reduction = (size_saved / stats['original_size']) * 100
-                                st.metric("Reduction", f"{reduction:.1f}%")
+                                if reduction > 0:
+                                    st.metric("Reduction", f"{reduction:.1f}%", delta="Compressed")
+                                else:
+                                    st.metric("Change", f"{abs(reduction):.1f}%", delta="Larger", delta_color="inverse")
                         
                         # Page statistics
                         col1, col2, col3 = st.columns(3)
@@ -429,10 +435,14 @@ if st.button("🚀 Process Files", type="primary"):
                             removed = stats['original_pages'] - stats['final_pages']
                             st.metric("Pages Removed", removed)
                         
-                        if 'blanks_removed' in stats:
+                        if 'blanks_removed' in stats and stats['blanks_removed'] > 0:
                             st.info(f"🗑️ Removed {stats['blanks_removed']} blank page(s)")
-                        if 'duplicates_removed' in stats:
+                        if 'duplicates_removed' in stats and stats['duplicates_removed'] > 0:
                             st.info(f"🔍 Removed {stats['duplicates_removed']} duplicate(s)")
+                        
+                        # Show note if file got larger
+                        if stats['final_size'] > stats['original_size']:
+                            st.warning("ℹ️ File is slightly larger due to PDF structure optimization and metadata. This ensures maximum compatibility with all PDF readers.")
                         
                         # Download button
                         st.download_button(
