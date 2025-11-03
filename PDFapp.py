@@ -25,7 +25,7 @@ import base64
 
 # Set page config
 st.set_page_config(
-    page_title="PDF by Het",
+    page_title="Het's PDFExpress",
     page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded"
