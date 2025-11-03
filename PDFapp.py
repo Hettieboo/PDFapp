@@ -32,7 +32,7 @@ st.set_page_config(
 )
 
 # Display logo
-logo = Image.open("applogo.png")  # Make sure applogo.png is in the repo
+logo = Image.open("appLogo.png")  # Make sure applogo.png is in the repo
 st.image(logo, width=150)         # Adjust width as needed
 
 # Custom CSS
