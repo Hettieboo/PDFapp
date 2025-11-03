@@ -25,7 +25,7 @@ import base64
 
 # Set page config
 st.set_page_config(
-    page_title="Het's PDFExpress",
+    page_title="PDF by Het",
     page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -57,7 +57,7 @@ st.markdown("""
 # Header
 st.markdown("""
     <div class="main-header">
-        <h1>📄 PDF by Het</h1>
+        <h1>📄 Het's PDFExpress</h1>
         <p>Complete Document Processing Tool | Created by Hettie</p>
     </div>
 """, unsafe_allow_html=True)
@@ -87,7 +87,7 @@ remove_duplicates = st.sidebar.checkbox("Remove duplicates", value=False)
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 💡 About")
 st.sidebar.info("""
-**PDF by Het** can:
+**Het's PDFExpress** can:
 - Scan documents from images
 - Merge multiple PDFs
 - Clean and optimize files
@@ -370,38 +370,25 @@ if st.button("🚀 Process Files", type="primary"):
                         reader_temp = PdfReader(temp_bytes)
                         writer = compress_pdf_func(reader_temp)
                     
-                    # Save output with proper metadata using pypdf for better compatibility
+                    # Save output with proper metadata
                     output_bytes = io.BytesIO()
                     
-                    # Use pypdf for final write (more reliable)
-                    final_writer = PypdfWriter()
-                    
-                    # Write current content to temp buffer
-                    temp_buffer = io.BytesIO()
-                    writer.write(temp_buffer)
-                    temp_buffer.seek(0)
-                    
-                    # Read back and write with pypdf
-                    temp_reader = PypdfReader(temp_buffer)
-                    for page in temp_reader.pages:
-                        final_writer.add_page(page)
-                    
                     # Add metadata
-                    final_writer.add_metadata({
-                        '/Producer': 'PDF by Het',
-                        '/Creator': 'PDF by Het - Created by Hettie',
-                        '/Title': 'Processed by PDF by Het'
+                    writer.add_metadata({
+                        '/Producer': 'Hets PDFExpress',
+                        '/Creator': 'Hets PDFExpress - Created by Hettie',
+                        '/Title': 'Processed by Hets PDFExpress'
                     })
                     
                     # Write final output
-                    final_writer.write(output_bytes)
+                    writer.write(output_bytes)
                     output_bytes.seek(0)
                     
-                    stats['final_pages'] = len(final_writer.pages)
+                    stats['final_pages'] = len(writer.pages)
                     stats['final_size'] = len(output_bytes.getvalue())
                     
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    output_name = f"PDFbyHet_{os.path.splitext(name)[0]}_{timestamp}.pdf"
+                    output_name = f"HetsPDFExpress_{os.path.splitext(name)[0]}_{timestamp}.pdf"
                     
                     output_files.append({
                         'name': output_name,
