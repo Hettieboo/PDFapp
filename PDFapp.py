@@ -178,12 +178,24 @@ def image_to_pdf(image_file, enhance=True, perspective=True):
     else:
         img_pil = Image.fromarray(cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB))
     
-    # Convert to PDF bytes
+    # Convert to RGB if needed
+    if img_pil.mode != 'RGB':
+        img_pil = img_pil.convert('RGB')
+    
+    # Convert to PDF bytes with proper settings
     pdf_bytes = io.BytesIO()
-    img_pil.save(pdf_bytes, format='PDF')
+    img_pil.save(pdf_bytes, format='PDF', resolution=100.0, quality=95)
     pdf_bytes.seek(0)
     
     return pdf_bytes
+
+def format_file_size(size_bytes):
+    """Format bytes to human readable format"""
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if size_bytes < 1024.0:
+            return f"{size_bytes:.2f} {unit}"
+        size_bytes /= 1024.0
+    return f"{size_bytes:.2f} TB"
 
 def is_blank_page(page, threshold=100):
     """Check if a page is blank"""
@@ -319,6 +331,7 @@ if st.button("🚀 Process Files", type="primary"):
                 
                 for name, pdf_bytes in pdfs_to_process:
                     pdf_bytes.seek(0)
+                    original_size = len(pdf_bytes.getvalue())
                     reader = PdfReader(pdf_bytes)
                     original_pages = len(reader.pages)
                     
@@ -326,7 +339,10 @@ if st.button("🚀 Process Files", type="primary"):
                     for page in reader.pages:
                         writer.add_page(page)
                     
-                    stats = {'original_pages': original_pages}
+                    stats = {
+                        'original_pages': original_pages,
+                        'original_size': original_size
+                    }
                     
                     # Remove blank pages
                     if remove_blanks:
@@ -354,12 +370,18 @@ if st.button("🚀 Process Files", type="primary"):
                         reader_temp = PdfReader(temp_bytes)
                         writer = compress_pdf_func(reader_temp)
                     
-                    # Save output
+                    # Save output with proper metadata
                     output_bytes = io.BytesIO()
+                    writer.add_metadata({
+                        '/Producer': 'PDF by Het',
+                        '/Creator': 'PDF by Het - Created by Hettie',
+                        '/Title': f'Processed by PDF by Het'
+                    })
                     writer.write(output_bytes)
                     output_bytes.seek(0)
                     
                     stats['final_pages'] = len(writer.pages)
+                    stats['final_size'] = len(output_bytes.getvalue())
                     
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     output_name = f"PDFbyHet_{os.path.splitext(name)[0]}_{timestamp}.pdf"
@@ -380,6 +402,23 @@ if st.button("🚀 Process Files", type="primary"):
                 for output_file in output_files:
                     with st.expander(f"📄 {output_file['name']}", expanded=True):
                         stats = output_file['stats']
+                        
+                        # File size comparison
+                        col1, col2, col3, col4 = st.columns(4)
+                        
+                        with col1:
+                            st.metric("Original Size", format_file_size(stats['original_size']))
+                        with col2:
+                            st.metric("Final Size", format_file_size(stats['final_size']))
+                        with col3:
+                            size_saved = stats['original_size'] - stats['final_size']
+                            st.metric("Space Saved", format_file_size(size_saved))
+                        with col4:
+                            if stats['original_size'] > 0:
+                                reduction = (size_saved / stats['original_size']) * 100
+                                st.metric("Reduction", f"{reduction:.1f}%")
+                        
+                        # Page statistics
                         col1, col2, col3 = st.columns(3)
                         
                         with col1:
