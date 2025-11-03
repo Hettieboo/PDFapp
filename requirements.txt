@@ -1,0 +1,6 @@
+streamlit
+PyPDF2
+pillow
+opencv-python-headless
+pytesseract
+img2pdf
