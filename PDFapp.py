@@ -370,17 +370,34 @@ if st.button("🚀 Process Files", type="primary"):
                         reader_temp = PdfReader(temp_bytes)
                         writer = compress_pdf_func(reader_temp)
                     
-                    # Save output with proper metadata
+                    # Save output with proper metadata using pypdf for better compatibility
                     output_bytes = io.BytesIO()
-                    writer.add_metadata({
+                    
+                    # Use pypdf for final write (more reliable)
+                    final_writer = PypdfWriter()
+                    
+                    # Write current content to temp buffer
+                    temp_buffer = io.BytesIO()
+                    writer.write(temp_buffer)
+                    temp_buffer.seek(0)
+                    
+                    # Read back and write with pypdf
+                    temp_reader = PypdfReader(temp_buffer)
+                    for page in temp_reader.pages:
+                        final_writer.add_page(page)
+                    
+                    # Add metadata
+                    final_writer.add_metadata({
                         '/Producer': 'PDF by Het',
                         '/Creator': 'PDF by Het - Created by Hettie',
-                        '/Title': f'Processed by PDF by Het'
+                        '/Title': 'Processed by PDF by Het'
                     })
-                    writer.write(output_bytes)
+                    
+                    # Write final output
+                    final_writer.write(output_bytes)
                     output_bytes.seek(0)
                     
-                    stats['final_pages'] = len(writer.pages)
+                    stats['final_pages'] = len(final_writer.pages)
                     stats['final_size'] = len(output_bytes.getvalue())
                     
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
