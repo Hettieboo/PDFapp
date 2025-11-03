@@ -1,5 +1,6 @@
 streamlit
 PyPDF2
+pypdf
 pillow
 opencv-python-headless
 pytesseract
