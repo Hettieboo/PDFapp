@@ -8,7 +8,7 @@ Created by Hettie
 
 ## Overview
 
-**Het’s PDFExpress** is a document processing web application built with **Python** and **Streamlit**.
+**PDFxpress** is a document processing web application built with **Python** and **Streamlit**.
 It enables users to upload, clean, enhance, and convert PDF or image files quickly and locally.
 
 The app supports image enhancement, PDF merging, blank page detection, and compression, making it a complete solution for lightweight document workflows.
